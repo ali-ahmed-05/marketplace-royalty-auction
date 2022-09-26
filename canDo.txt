@@ -1,0 +1,7 @@
+1.give rewards 
+2.mint another nft
+3.breed through erc20 or ether (to enhance Nft)
+4.unlock features of the application
+5.can get roles
+
+
