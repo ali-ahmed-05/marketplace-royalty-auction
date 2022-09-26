@@ -76,7 +76,7 @@ event MarketItemCreated (
     bool sold
 );
 
-
+//0x2a55205a
  
 
 function getNftType(address nftContract) public view returns(uint256){
@@ -84,6 +84,19 @@ function getNftType(address nftContract) public view returns(uint256){
       return 0 ;
     else
       return 1 ;
+  }
+
+function isRoyalty(address nftContract) public view returns(bool){
+  if(IERC2981(nftContract).supportsInterface(0x2a55205a))
+      return true;
+    else
+      return false;
+  }
+
+function royalty(address nftContract ,uint256 tokenId , uint256 price) public view returns(address receiver,
+ uint256 uintpayAmount){
+  if(isRoyalty(nftContract))
+  (receiver , uintpayAmount) = IERC2981(nftContract).royaltyInfo(tokenId , price);
   }
 
 function transferNFT (
@@ -187,8 +200,9 @@ amount
 );
 
 (address receiver ,
- uint256 uintpayAmount) = IERC2981(nftContract).royaltyInfo(tokenId , price);
+ uint256 uintpayAmount) = royalty(nftContract,tokenId , price);
 
+  if(receiver != address(0))
  payable(receiver).transfer(uintpayAmount);
 
 idToMarketItem[itemId].seller.transfer(price - uintpayAmount);
@@ -206,9 +220,10 @@ uint tokenId = idToMarketItem[itemId].tokenId;
 
 require(msg.value == price, "Please submit the asking price in order to complete the purchase");
 
- (address receiver ,
-  uint256 uintpayAmount) = IERC2981(nftContract).royaltyInfo(tokenId , price);
+(address receiver ,
+ uint256 uintpayAmount) = royalty(nftContract,tokenId , price);
 
+  if(receiver != address(0))
     payable(receiver).transfer(uintpayAmount);
 
     idToMarketItem[itemId].seller.transfer(price - uintpayAmount);
